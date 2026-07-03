@@ -1,0 +1,7 @@
+# Optional Codex project config example.
+# Keep Codex guidance mainly in AGENTS.md and .agents/skills/ for portability.
+# Copy to config.toml only if your Codex version supports these options.
+
+# model_reasoning_effort = "medium"
+# approval_policy = "on-request"
+# sandbox_mode = "workspace-write"

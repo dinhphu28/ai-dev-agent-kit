@@ -1,0 +1,72 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "ai-lite-plan",
+  "instructions": [
+    "AGENTS.md",
+    "docs/ai-workflow/agent-index.md"
+  ],
+  "agent": {
+    "ai-lite-plan": {
+      "prompt": "{file:./agents/ai-lite-plan.md}",
+      "mode": "primary",
+      "temperature": 0.1,
+      "steps": 4,
+      "permission": {
+        "edit": "deny",
+        "webfetch": "deny",
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "ls*": "allow",
+          "find *": "allow",
+          "grep *": "allow",
+          "rg *": "allow",
+          "pwd": "allow"
+        }
+      }
+    },
+    "ai-lite-build": {
+      "prompt": "{file:./agents/ai-lite-build.md}",
+      "mode": "primary",
+      "temperature": 0.2,
+      "steps": 8,
+      "permission": {
+        "edit": "ask",
+        "webfetch": "deny",
+        "task": {
+          "*": "deny"
+        },
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git diff --stat*": "allow",
+          "ls*": "allow",
+          "find *": "allow",
+          "grep *": "allow",
+          "rg *": "allow",
+          "pwd": "allow"
+        }
+      }
+    },
+    "ai-lite-review": {
+      "prompt": "{file:./agents/ai-lite-review.md}",
+      "mode": "subagent",
+      "temperature": 0.1,
+      "steps": 4,
+      "permission": {
+        "edit": "deny",
+        "webfetch": "deny",
+        "bash": {
+          "*": "ask",
+          "git status*": "allow",
+          "git diff*": "allow",
+          "git diff --stat*": "allow",
+          "grep *": "allow",
+          "rg *": "allow"
+        }
+      }
+    }
+  }
+}

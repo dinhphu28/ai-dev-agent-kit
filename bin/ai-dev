@@ -1,0 +1,174 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  cat <<USAGE
+ai-dev helper
+
+Usage:
+  ai-dev new-task <TASK-ID> "Task title"
+  ai-dev confluence-init <JIRA-KEY> "Title"
+  ai-dev confluence-status
+  ai-dev status
+  ai-dev handoff
+  ai-dev check
+
+Commands:
+  new-task           Create a task file from the template.
+  confluence-init    Initialize Confluence snapshot files for one Jira issue.
+  confluence-status  Show Confluence workflow snapshot files.
+  status             Show git status and AI workflow files.
+  handoff    Print current session handoff file path and content if it exists.
+  check      Run lightweight repository sanity checks.
+USAGE
+}
+
+slugify() {
+  echo "$1" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-|-$//g'
+}
+
+new_task() {
+  local id="${1:-}"
+  local title="${2:-}"
+  if [[ -z "$id" || -z "$title" ]]; then
+    echo "usage: ai-dev new-task TASK-001 \"Short title\""
+    exit 1
+  fi
+  mkdir -p tasks
+  local slug
+  slug="$(slugify "$title")"
+  local file="tasks/${id}-${slug}.md"
+  if [[ -e "$file" ]]; then
+    echo "exists: $file"
+    exit 1
+  fi
+  if [[ -e tasks/TASK-000-template.md ]]; then
+    cp tasks/TASK-000-template.md "$file"
+  else
+    cat > "$file" <<'TASK'
+# TASK-XXX: <short title>
+
+## Goal
+
+## Context
+
+## Input Documents
+
+- `AGENTS.md`
+
+## Affected Layers
+
+- API:
+- Domain/Application:
+- Infrastructure/Persistence:
+- Frontend:
+- Tests:
+
+## Acceptance Criteria
+
+- [ ]
+
+## Test Requirements
+
+- [ ]
+
+## Security / Authorization Requirements
+
+## Validation Requirements
+
+## Do Not Do
+
+- Do not modify unrelated files.
+
+## Done When
+
+- [ ] Code compiles.
+- [ ] Relevant tests pass.
+TASK
+  fi
+  sed -i "1s/.*/# ${id}: ${title}/" "$file" 2>/dev/null || true
+  echo "created: $file"
+}
+
+confluence_init() {
+  local key="${1:-}"
+  local title="${2:-}"
+  if [[ -z "$key" || -z "$title" ]]; then
+    echo "usage: ai-dev confluence-init JIRA-123 \"Short title\""
+    exit 1
+  fi
+  local dir="docs/ai-workflow/confluence/$key"
+  mkdir -p "$dir"
+  for name in source-index requirement-snapshot clarification-qna design-note implementation-summary; do
+    local src="docs/ai-workflow/confluence/${name}-template.md"
+    local dst="$dir/${name}.md"
+    case "$name" in
+      source-index) src="docs/ai-workflow/confluence/source-index.md" ;;
+      requirement-snapshot) src="docs/ai-workflow/confluence/requirement-snapshot.md" ;;
+      clarification-qna) src="docs/ai-workflow/confluence/clarification-qna-template.md" ;;
+      design-note) src="docs/ai-workflow/confluence/design-note-template.md" ;;
+      implementation-summary) src="docs/ai-workflow/confluence/implementation-summary-template.md" ;;
+    esac
+    if [[ -e "$src" && ! -e "$dst" ]]; then
+      cp "$src" "$dst"
+    elif [[ ! -e "$dst" ]]; then
+      touch "$dst"
+    fi
+  done
+  sed -i "s/Jira issue:/Jira issue: $key/g; s/Key:/Key: $key/g; s/Title:/Title: $title/g" "$dir"/*.md 2>/dev/null || true
+  echo "created: $dir"
+}
+
+confluence_status() {
+  echo "== Confluence workflow =="
+  if [[ -d docs/ai-workflow/confluence ]]; then
+    find docs/ai-workflow/confluence -maxdepth 2 -type f | sort
+  else
+    echo "missing: docs/ai-workflow/confluence"
+  fi
+}
+
+status_cmd() {
+  echo "== Git =="
+  git status --short || true
+  echo
+  echo "== AI workflow files =="
+  for f in AGENTS.md CLAUDE.md docs/ai-workflow/agent-index.md docs/ai-workflow/open-questions.md docs/ai-workflow/session-handoff.md; do
+    [[ -e "$f" ]] && echo "ok: $f" || echo "missing: $f"
+  done
+  echo
+  echo "== Tasks =="
+  find tasks -maxdepth 1 -type f -name 'TASK-*.md' 2>/dev/null | sort || true
+}
+
+handoff_cmd() {
+  local f="docs/ai-workflow/session-handoff.md"
+  echo "$f"
+  if [[ -e "$f" ]]; then
+    echo
+    cat "$f"
+  fi
+}
+
+check_cmd() {
+  echo "== Required files =="
+  test -f AGENTS.md && echo "ok: AGENTS.md" || echo "missing: AGENTS.md"
+  test -f docs/ai-workflow/agent-index.md && echo "ok: docs/ai-workflow/agent-index.md" || echo "missing: docs/ai-workflow/agent-index.md"
+  test -d tasks && echo "ok: tasks/" || echo "missing: tasks/"
+  echo
+  echo "== Git status =="
+  git status --short || true
+}
+
+cmd="${1:-help}"
+shift || true
+case "$cmd" in
+  new-task) new_task "${1:-}" "${2:-}" ;;
+  confluence-init) confluence_init "${1:-}" "${2:-}" ;;
+  confluence-status) confluence_status ;;
+  status) status_cmd ;;
+  handoff) handoff_cmd ;;
+  check) check_cmd ;;
+  help|-h|--help) usage ;;
+  *) echo "unknown command: $cmd"; usage; exit 1 ;;
+esac

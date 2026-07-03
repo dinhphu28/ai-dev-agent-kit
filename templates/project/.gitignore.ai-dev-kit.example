@@ -1,0 +1,5 @@
+# Keep project instructions committed.
+# Do not commit local/private overrides.
+.claude/settings.local.json
+.codex/local.toml
+.opencode/local.json
