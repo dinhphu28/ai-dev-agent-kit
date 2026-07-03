@@ -107,11 +107,21 @@ Use the review-diff skill on the current diff.
 
 ## Jira / Confluence workflow
 
-Install project files, then configure Atlassian MCP for your agent. For Claude Code, the intended server name is `atlassian` and the remote MCP URL is:
+Install project files, then configure the Atlassian MCP for your agent. The default is a **local stdio MCP** (`atlassian-mcp`) under the server name `atlassian`. Configure it once, then register it with Claude Code:
 
-```text
-https://mcp.atlassian.com/v1/mcp/authv2
+```bash
+atlassian-mcp setup    # site URL, email, API token
+atlassian-mcp login    # verify credentials
+claude mcp add --transport stdio atlassian -- ~/.local/bin/atlassian-mcp
 ```
+
+Run `/mcp` in Claude Code to confirm the `atlassian` server is connected. To use Atlassian's hosted Rovo MCP instead of the local binary:
+
+```bash
+claude mcp add --transport http atlassian https://mcp.atlassian.com/v1/mcp/authv2
+```
+
+See `docs/ai-workflow/mcp-atlassian-setup.md` for full setup, tool list, and security rules.
 
 Use this flow:
 
