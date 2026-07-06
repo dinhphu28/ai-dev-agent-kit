@@ -79,6 +79,14 @@ After project install, run opencode from the repo root and use:
 
 The opencode config limits steps and prevents broad subagent fan-out by default.
 
+If you want automatic continuation while keeping each model call small, use the loop helper:
+
+```bash
+bin/ai-dev opencode-loop tasks/TASK-001.md 8
+```
+
+This repeatedly runs `@ai-lite-build` on exactly one unchecked checklist item at a time. It stops when the task file has no unchecked `- [ ]` items left, or when the max run count is reached. The agent must update the task checkboxes as it completes each slice.
+
 ## Claude Code usage
 
 From the repo root:

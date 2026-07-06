@@ -12,6 +12,7 @@ Usage:
   ai-dev status
   ai-dev handoff
   ai-dev check
+  ai-dev opencode-loop <task-file> [max-runs]
 
 Commands:
   new-task           Create a task file from the template.
@@ -20,6 +21,7 @@ Commands:
   status             Show git status and AI workflow files.
   handoff    Print current session handoff file path and content if it exists.
   check      Run lightweight repository sanity checks.
+  opencode-loop  Re-run ai-lite-build on one task until its checklist is complete.
 USAGE
 }
 
@@ -160,6 +162,53 @@ check_cmd() {
   git status --short || true
 }
 
+task_has_unchecked_items() {
+  local task_file="$1"
+  grep -Eq '^- \[ \]' "$task_file"
+}
+
+opencode_loop() {
+  local task_file="${1:-}"
+  local max_runs="${2:-8}"
+
+  if [[ -z "$task_file" ]]; then
+    echo "usage: ai-dev opencode-loop tasks/TASK-001-example.md [max-runs]"
+    exit 1
+  fi
+  if [[ ! -f "$task_file" ]]; then
+    echo "missing task file: $task_file"
+    exit 1
+  fi
+  if ! command -v opencode >/dev/null 2>&1; then
+    echo "missing dependency: opencode"
+    exit 1
+  fi
+  if ! [[ "$max_runs" =~ ^[0-9]+$ ]] || [[ "$max_runs" -lt 1 ]]; then
+    echo "max-runs must be a positive integer"
+    exit 1
+  fi
+
+  local run=1
+  while task_has_unchecked_items "$task_file"; do
+    if [[ "$run" -gt "$max_runs" ]]; then
+      echo "stopped: reached max-runs=$max_runs"
+      echo "remaining unchecked items:"
+      grep -n '^- \[ \]' "$task_file" || true
+      exit 2
+    fi
+
+    echo "== opencode ai-lite-build run $run/$max_runs =="
+    opencode run \
+      --agent ai-lite-build \
+      --title "ai-lite-build loop: $task_file" \
+      "Use ai-lite-build on $task_file. Implement exactly one unchecked Acceptance Criteria item, or if all acceptance criteria are checked, exactly one unchecked Done When/Test Requirements item. Keep the slice tiny. Update the completed checkbox in $task_file. Run the narrowest relevant check. If blocked, update docs/ai-workflow/session-handoff.md and stop."
+
+    run=$((run + 1))
+  done
+
+  echo "complete: no unchecked checklist items remain in $task_file"
+}
+
 cmd="${1:-help}"
 shift || true
 case "$cmd" in
@@ -169,6 +218,7 @@ case "$cmd" in
   status) status_cmd ;;
   handoff) handoff_cmd ;;
   check) check_cmd ;;
+  opencode-loop) opencode_loop "${1:-}" "${2:-8}" ;;
   help|-h|--help) usage ;;
   *) echo "unknown command: $cmd"; usage; exit 1 ;;
 esac
