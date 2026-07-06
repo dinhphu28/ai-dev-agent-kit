@@ -39,6 +39,7 @@
 - `.opencode/agents/ai-lite-build.md`
 - `.opencode/agents/ai-lite-review.md`
 - `.opencode/skills/*/SKILL.md`
+- `bin/ai-dev opencode-loop` for repeated small `ai-lite-build` slices
 
 ## Jira / Confluence
 
