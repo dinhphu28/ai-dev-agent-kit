@@ -20,6 +20,7 @@
           "git diff*": "allow",
           "ls*": "allow",
           "find *": "allow",
+          "fd *": "allow",
           "grep *": "allow",
           "rg *": "allow",
           "pwd": "allow"
@@ -44,6 +45,7 @@
           "git diff --stat*": "allow",
           "ls*": "allow",
           "find *": "allow",
+          "fd *": "allow",
           "grep *": "allow",
           "rg *": "allow",
           "pwd": "allow"
@@ -63,6 +65,7 @@
           "git status*": "allow",
           "git diff*": "allow",
           "git diff --stat*": "allow",
+          "fd *": "allow",
           "grep *": "allow",
           "rg *": "allow"
         }

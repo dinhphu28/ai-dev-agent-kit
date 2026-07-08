@@ -30,6 +30,17 @@ Use lazy loading.
 - Prefer targeted search by domain term, class name, endpoint, or file path.
 - If context grows too large, write `docs/ai-workflow/session-handoff.md` and stop.
 
+## Tooling & Search
+
+Prefer faster, modern CLI tools when they are installed; fall back to POSIX tools when they are not. Never fail a task just because a preferred tool is missing.
+
+- Content search: prefer `rg` (ripgrep) over `grep` / `grep -r`. Scope by path and use type filters, e.g. `rg -t ts "pattern" src/`.
+- File search: prefer `fd` over `find`, e.g. `fd -e ts config src/`.
+- Fallback: if `rg` or `fd` is not on `PATH`, use `grep` / `find` instead.
+- Do not run interactive tools non-interactively. `fzf`, `less`, `vim`, `top`, and similar block waiting for input and will hang the agent. For fuzzy matching, pipe `rg`/`fd` output through a non-interactive filter — never launch bare `fzf`.
+- Keep searches targeted (see Context Budget); do not scan the whole repository unless the task requires it.
+- Claude Code note: the built-in Grep and Glob tools already use ripgrep — prefer them over shelling out to `grep`/`find`.
+
 ## Jira / Confluence Rules
 
 - Treat Jira and Confluence as external source-of-truth systems.
