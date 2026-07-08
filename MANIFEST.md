@@ -19,6 +19,7 @@
 - `production-check`
 - `session-handoff`
 - `opencode-lite`
+- `clean-code` — combined craftsmanship/architecture/conduct skill distilled from Robert C. Martin's *Clean Code*, *Clean Architecture*, and *The Clean Coder* (`SKILL.md` + 3 on-demand reference files)
 
 ## Claude Code
 
