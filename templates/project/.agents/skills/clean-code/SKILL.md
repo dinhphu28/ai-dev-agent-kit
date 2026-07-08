@@ -1,6 +1,6 @@
 ---
 name: clean-code
-description: Use when writing or reviewing code and craftsmanship matters — naming, function or class design, code smells, refactoring, or duplication; when shaping system design, architecture boundaries, dependency direction, or applying SOLID; when frameworks or details leak into business rules; or when professional discipline is at stake — estimates, commitments, saying no, TDD, or working under pressure. Keywords: Clean Code, Clean Architecture, SOLID, code smell, refactor, TDD, boundaries, dependency rule.
+description: "Use when writing or reviewing code and craftsmanship matters — naming, function or class design, code smells, refactoring, or duplication; when shaping system design, architecture boundaries, dependency direction, or applying SOLID; when frameworks or details leak into business rules; or when professional discipline is at stake — estimates, commitments, saying no, TDD, or working under pressure. Keywords: Clean Code, Clean Architecture, SOLID, code smell, refactor, TDD, boundaries, dependency rule."
 ---
 
 # Clean Code
